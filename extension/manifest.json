@@ -1,0 +1,47 @@
+{
+    "manifest_version": 3,
+    "name": "Backtick",
+    "short_name": "Backtick",
+    "description": "Powerful commands in your browser.",
+    "version": "0.6.3",
+    "icons": {
+        "16": "static/images/icon128.png",
+        "32": "static/images/icon128.png",
+        "48": "static/images/icon128.png",
+        "128": "static/images/icon128.png"
+    },
+    "background": {
+        "service_worker": "script/background.js"
+    },
+    "action": {
+        "default_icon": {
+            "19": "static/images/icon128.png",
+            "38": "static/images/icon128.png"
+        },
+        "default_title": "Open the Backtick console",
+        "default_popup": "static/popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["script/content-script.js"]
+        }
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self';"
+    },
+    "host_permissions": ["*://*/*"],
+    "permissions": ["tabs", "storage", "scripting"],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "static/images/*.png",
+                "style/style.css"
+            ],
+            "matches": ["*://*/*"]
+        }
+    ],
+    "externally_connectable": {
+        "matches": ["*://*.github.com/*"]
+    }
+}

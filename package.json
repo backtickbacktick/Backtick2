@@ -1,0 +1,41 @@
+{
+    "name": "backtick2",
+    "version": "1.0.0",
+    "description": "The Unpackaged Backtick Chrome Extension",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"No test specified\" && exit 0",
+        "build": "webpack --mode=development",
+        "publish": "webpack --mode=production && npx ts-node src/tools/zip.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://iambriansreed@github.com/backtickbacktick/Backtick2.git"
+    },
+    "author": "Brian Reed <me@iambrian.com> (http://iambrian.com)",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/backtickbacktick/Backtick2/issues"
+    },
+    "homepage": "https://github.com/backtickbacktick/Backtick2#readme",
+    "devDependencies": {
+        "@types/chrome": "^0.0.197",
+        "@typescript-eslint/eslint-plugin": "^5.38.1",
+        "eslint": "^8.24.0",
+        "eslint-config-prettier": "^8.5.0",
+        "eslint-config-standard-with-typescript": "^23.0.0",
+        "eslint-plugin-import": "^2.26.0",
+        "eslint-plugin-n": "^15.3.0",
+        "eslint-plugin-prettier": "^4.2.1",
+        "eslint-plugin-promise": "^6.0.1",
+        "file-loader": "^6.2.0",
+        "node-sass": "^7.0.3",
+        "remove-files-webpack-plugin": "^1.5.0",
+        "sass-loader": "^13.0.2",
+        "ts-loader": "^9.4.1",
+        "typescript": "^4.8.4",
+        "webpack": "^5.74.0",
+        "webpack-cli": "^4.10.0",
+        "zip-a-folder": "^1.1.5"
+    }
+}
