@@ -25,26 +25,6 @@ $orange-color: #d5851b;
     }
 }
 
-@keyframes _bt-spinner {
-    from {
-        background-position-x: -100%;
-    }
-    to {
-        background-position-x: 100%;
-    }
-}
-
-@keyframes _bt-fade-in {
-    0% {
-        opacity: 0;
-    }
-}
-
-@keyframes _bt-fade-out {
-    100% {
-        opacity: 0;
-    }
-}
 
 #backtick-container {
     .reset {
