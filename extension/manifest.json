@@ -3,7 +3,7 @@
     "name": "Backtick",
     "short_name": "Backtick",
     "description": "Powerful commands in your browser.",
-    "version": "0.6.3",
+    "version": "1.0.1",
     "icons": {
         "16": "static/images/icon128.png",
         "32": "static/images/icon128.png",

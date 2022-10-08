@@ -1,10 +1,19 @@
 $background-color: #333;
 $foreground-color: #e1e1e1;
+$orange-color: #d5851b;
 
 body {
+    .reset {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+        border: none;
+    }
+
     background-color: $background-color;
     color: $foreground-color;
-    
+
     min-width: 260px;
 
     font-family: sans-serif;
@@ -16,12 +25,19 @@ body {
     padding: 1.5rem;
     margin: 0;
 
-    .reset {
-        box-sizing: border-box;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        border: none;
+    .loading {
+        font-size: 16px;
+        font-weight: bold;
+        color: $orange-color;
+    }
+
+    button {
+        @extend .reset;
+        margin-top: 1rem;
+        color: $orange-color;
+        font-weight: bold;
+        display: none;
+        cursor: pointer;
     }
 
     @extend .reset;
@@ -32,7 +48,12 @@ body {
             @extend .reset;
             list-style: none;
             padding: 0.5rem 0;
-            & + li { border-top: solid #555 1px; }
+            & + li {
+                border-top: solid #555 1px;
+            }
+            &.error {
+                color: pink;
+            }
         }
     }
 }

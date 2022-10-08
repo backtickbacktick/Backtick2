@@ -1,10 +1,7 @@
 const path = require('path');
 const RemovePlugin = require('remove-files-webpack-plugin');
 
-module.exports = (mode) => ({
-    devtool: mode === 'development' ?  'source-map' : undefined,
-    watch:  mode === 'development',
-    mode,
+module.exports = {
     entry: {
         main: './src/script/main.ts',
         'content-script': './src/script/content-script.ts',
@@ -49,4 +46,4 @@ module.exports = (mode) => ({
             },
         }),
     ],
-});
+};

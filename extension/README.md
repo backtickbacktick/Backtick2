@@ -1,6 +1,6 @@
 # Backtick2
 
-**Backtick2 is a command line for bookmarklets and scripts**, as an *unpackaged* Chrome extension. Chrome no longer allows the running of scripts not included in an extension. This extension makes running custom scripts easy as an *unpackaged*.
+**Backtick2 is a command line for bookmarklets and scripts**, as an *unpacked* Chrome extension. Chrome no longer allows the running of scripts not included in an extension so this *unpacked* extension makes adding and running custom scripts easy.
 
 To load the extension, [follow these instructions](https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked).
 
@@ -11,6 +11,18 @@ The JSDoc tells the extension when and how to run the script.
 
 Commands may be searched for in the console, selected, and run. 
 Commands may also automatically run when the console is loaded under certain conditions.
+
+
+<br>
+
+---
+
+
+## Examples
+<br>
+### Shortcut with Autorun
+
+As soon as a user types `'gc'` in the console this script executes. Effectively 3 keys <code>&#96;gc</code> launches a new window with a cached version of the current page. Please be aware that `shortcut` combined with `autorun` can be very helpful but a shortcut may block other scripts from being searched. For example a shortcut like `'gc'` is probably ok because no english word starts the `'gc'`. On the other hand a shortcut like `'s'` with `autorun` will prevent the user from finding any other script when 's' is typed in first in the console.
 
 ```javascript
 /**
@@ -25,12 +37,56 @@ Commands may also automatically run when the console is loaded under certain con
 })()
 ```
 
+### Shortcut without Autorun
+
+Without `autorun` you can have shortcuts make use of other text in the console.
+
+```javascript
+/**
+ * @name Google Search 
+ * @description Google searches anything after 's '
+ * @shortcut s
+ */
+(() => {
+    window.open(
+       `https://www.google.com/search?q=`+ (document.querySelector('#backtick-container input').value + '').substring(2)
+    );
+})()
+```
+
+### URL with Autorun
+
+With a `url` and `autorun` you can have commands execute immediately when a url matches the parameter and the user opens the console. 
+
+**Hot tip:** Setting the `close` param to `true` with these other params effectively prevents other backtick scripts from running.
+
+```javascript
+/**
+ * @name Autorun Welcome for iambrian.com
+ * @description Auto executes when url matches
+ * @hidden true
+ * @autorun url
+ * @url https*://iambrian.com/*
+ * @close true
+ * 
+ */
+(() => {
+    alert(`
+
+    Hello, welcome to my website!
+    
+    `);
+})()
+```
+<br>
+
+---
+
 ### JSDoc Params
 
+<br>
 
-
-
-| parameter   | type        | default |  |
+| Parameter   | Type        | Default |  Description |
 | ----------- | ----------- | ----------- |----------- |
 | name | `string` | <span style="color: OrangeRed">required<span>  | Name (searchable)
 | description | `string`|  <span style="color: OrangeRed">required<span>   | Description (searchable)
@@ -40,8 +96,8 @@ Commands may also automatically run when the console is loaded under certain con
 | url | `string` | `null` | Regex value to match current URL to
 | close | `boolean` | `false` | Close console when script is run
 
-\* Required fields
+<br>
+<br>
 
 
-
-*[MIT Licensed](http://opensource.org/licenses/MIT) 2022 Brian Reed*
+*[MIT Licensed](http://opensource.org/licenses/MIT) 2022 Brian Reed | Made with ❤️*

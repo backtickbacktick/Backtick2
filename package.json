@@ -1,12 +1,12 @@
 {
     "name": "backtick2",
-    "version": "1.0.0",
-    "description": "The Unpackaged Backtick Chrome Extension",
+    "version": "1.0.1",
+    "description": "The Unpacked Backtick Chrome Extension",
     "main": "index.js",
     "scripts": {
         "test": "echo \"No test specified\" && exit 0",
-        "build": "webpack --mode=development",
-        "publish": "webpack --mode=production && npx ts-node src/tools/zip.ts"
+        "build": "webpack -c webpack.config.dev.js",
+        "pub": "webpack -c webpack.config.prod.js && npx ts-node src/tools/publish.ts"
     },
     "repository": {
         "type": "git",

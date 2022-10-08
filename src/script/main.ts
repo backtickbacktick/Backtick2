@@ -1,47 +1,44 @@
 import '../style/main.scss';
-import { Command } from './utils/types';
 import { getStore } from './utils/store';
 import { runCommand } from './utils/actions';
-import { $$ } from './utils';
+import { $, $$ } from './utils';
+import backtickListener from './utils/backtickListener';
 
-type CommandElement = Command & {
-    element: HTMLLIElement;
-    blob: string;
-};
+type Result = { command: Command; relevance: number };
+
+const svg = `<svg viewBox="0 0 6 4"><polygon id="Path" points="3.225 0.017 5.4 3.591 3.85 3.591 0.8 0.017"></polygon></svg>`;
 
 new (class {
     public version: '1.0.1';
 
-    commands: CommandElement[] = [];
-    container: HTMLDivElement = null;
+    commands: Command[] = [];
+    rootElement: HTMLDivElement = null;
     inputElement: HTMLInputElement = null;
     noMatchElement: HTMLLIElement = null;
+    resultsElement: HTMLUListElement = null;
+    results: Result[] = [];
 
-    selectedCommandIndex = -1;
+    selectedIndex = -1;
 
     constructor() {
-        this.container = document.createElement('div');
-        this.container.id = 'backtick-container';
-        this.container.classList.add('loading');
-        this.container.innerHTML = `
-    <div class="console in">
-        <div class="icon"></div>
-        <input type="text" placeholder="Find and execute a command" spellcheck="false" name="backtick">
-    </div>
-    <div class="results">
-        <ul></ul>
-    </div>
-    `;
-        document.body.appendChild(this.container);
+        this.rootElement = document.createElement('div');
+        this.rootElement.id = 'backtick-container';
+        this.rootElement.style.display = 'none';
+        this.rootElement.classList.add('out');
+        this.rootElement.innerHTML = `
+<div class="console">
+    <input autocomplete="off" type="text" placeholder="Find and execute a command" spellcheck="false" name="backtick">
+    <div class="icon">${svg}</div>
+</div>
+<div class="results">
+    <ul></ul>
+</div>
+`;
+        document.body.appendChild(this.rootElement);
 
-        this.inputElement = $$('input', this.container);
+        this.resultsElement = $('ul', this.rootElement);
+        this.inputElement = $('input', this.rootElement);
         this.inputElement.disabled = true;
-
-        this.container.addEventListener('keyup', (e) =>
-            this.keyUpEventListener(e)
-        );
-
-        this.inputElement.addEventListener('input', () => this.inputChange());
 
         getStore().then((commands) => {
             const url = location.href;
@@ -58,138 +55,191 @@ new (class {
                 return;
             }
 
-            const ul = $$('ul', this.container);
+            this.loadConsole();
 
-            this.noMatchElement = document.createElement('li');
-            this.noMatchElement.classList.add('none', 'hidden');
-            this.noMatchElement.innerText = 'No commands found';
-            ul.appendChild(this.noMatchElement);
+            this.commands = commands;
 
-            commands.forEach((command, index) => {
-                const element = document.createElement('li');
-                element.tabIndex = 0;
-                element.classList.add('command', 'hidden');
-                element.dataset.commandIndex = index.toString();
-
-                // TODO: track commands by uid not index once sorting is in place
-
-                element.innerHTML = `<span class="name">${command.name}</span><p class="description">${command.description}</p>`;
-
-                ul.appendChild(element);
-
-                this.commands.push({
-                    ...command,
-                    element,
-                    blob: [
-                        command.shortcut,
-                        command.name,
-                        command.description,
-                        command.fileName,
-                    ]
-                        .join(' ')
-                        .toLowerCase(),
-                });
-
-                this.inputElement.disabled = false;
-                this.inputElement.focus();
-
-                this.container.classList.remove('loading');
-            });
+            this.inputElement.disabled = false;
         });
     }
 
-    selectCommand(direction: 'ArrowUp' | 'ArrowDown') {
-        if (direction === 'ArrowUp' && this.selectedCommandIndex === 0) {
+    loadConsole() {
+        this.rootElement.classList.replace('out', 'in');
+        this.rootElement.style.display = 'block';
+
+        setTimeout(() => {
+            this.inputElement.disabled = false;
             this.inputElement.focus();
-            this.selectedCommandIndex = -1;
-            return;
-        }
 
-        const commandsNotHidden = this.commands.filter(
-            (command) => !command.element.classList.contains('hidden')
+            this.rootElement.addEventListener('keyup', (e) =>
+                this.keyupListener(e)
+            );
+            this.rootElement.addEventListener('click', (e) =>
+                this.clickListener(e)
+            );
+            this.inputElement.addEventListener('input', () =>
+                this.inputChange()
+            );
+        }, 500); // timeout for in out animation
+    }
+
+    unloadConsole() {
+        this.rootElement.classList.replace('in', 'out');
+        this.resultsElement.innerHTML = '';
+        this.inputElement.value = '';
+
+        this.rootElement.removeEventListener('keyup', (e) =>
+            this.keyupListener(e)
+        );
+        this.rootElement.removeEventListener('click', (e) =>
+            this.clickListener(e)
+        );
+        this.inputElement.removeEventListener('input', () =>
+            this.inputChange()
         );
 
-        if (commandsNotHidden.length === 0) return;
-
-        const lastCommandSelectded =
-            this.selectedCommandIndex === commandsNotHidden.length - 1;
-
-        let nextIndex = 0;
-
-        if (lastCommandSelectded && direction === 'ArrowDown') {
-            nextIndex = 0;
-        } else {
-            nextIndex =
-                direction === 'ArrowUp'
-                    ? this.selectedCommandIndex - 1
-                    : this.selectedCommandIndex + 1;
-        }
-
-        commandsNotHidden[nextIndex].element.focus();
-
-        this.selectedCommandIndex = nextIndex;
+        setTimeout(() => {
+            this.rootElement.style.display = 'none';
+            backtickListener(() => this.loadConsole());
+        }, 500); // timeout for in out animation
     }
 
-    unloadContainer() {
-        const console = $$('.console', this.container);
-
-        console.classList.remove('in');
-        console.classList.add('out');
-
-        this.container.removeEventListener('keyup', (e) =>
-            this.keyUpEventListener(e)
-        );
-        this.container.removeEventListener('change', () => this.inputChange());
-
-        setTimeout(() => this.container.remove(), 1000);
-    }
-
-    getSearchText() {
-        const searchText = this.inputElement.value.toLowerCase();
-        const searchTextShortcut = searchText.split(' ')[0];
-        return { searchText, searchTextShortcut } as const;
-    }
-
-    async inputChange() {
-        this.selectedCommandIndex = -1;
-
+    loadResults() {
         const { searchText, searchTextShortcut } = this.getSearchText();
 
-        let noMatches = true;
-
-        const shortcutCommand = this.commands.find(
-            (command) => command.shortcut === searchTextShortcut
-        );
+        const shortcutCommand =
+            searchTextShortcut &&
+            this.commands.find(
+                (command) => command.shortcut === searchTextShortcut
+            );
 
         if (shortcutCommand?.autorun) {
             this.runCommand(shortcutCommand);
             return;
         }
 
-        // TODO: sort commands based on searchterm relative
+        if (shortcutCommand)
+            this.results = [{ command: shortcutCommand, relevance: 1 }];
+        else
+            this.results = this.commands
+                .filter(({ hidden }) => !hidden)
+                .map((command) => {
+                    const result = { command, relevance: 0 };
 
-        this.commands.forEach((command) => {
-            const showing =
-                !!shortcutCommand ||
-                (!command.hidden && command.blob.includes(searchText));
+                    [
+                        command.description?.toLowerCase(),
+                        command.fileName.toLowerCase(),
+                        command.name.toLowerCase(),
+                        command.shortcut?.toLowerCase(),
+                    ].map((blob, relevanceIndex) => {
+                        result.relevance += blob?.includes(searchText)
+                            ? relevanceIndex + 1
+                            : 0;
+                    });
 
-            command.element.classList[showing ? 'remove' : 'add']('hidden');
-            noMatches = noMatches || showing;
-        });
+                    return result;
+                });
 
-        if (noMatches) this.noMatchElement.classList.remove('hidden');
-        else this.noMatchElement.classList.add('hidden');
+        this.results.sort((a, b) => (a.relevance > b.relevance ? -1 : 1));
+
+        if (this.results.some((r) => r.relevance)) {
+            this.resultsElement.innerHTML = this.results
+                .map(
+                    ({ command }) => `
+<li class="command" tabindex="0" data-command="${command.fileName}">
+    <div class="active"></div><span class="name">${command.name}</span><p class="description">${command.description}</p>
+</li>
+            `
+                )
+                .join('');
+        } else {
+            this.resultsElement.innerHTML =
+                '<li class="none">No commands found</li>';
+        }
     }
 
-    async keyUpEventListener(e: KeyboardEvent) {
+    selectCommand(direction: 'ArrowUp' | 'ArrowDown') {
+        const resultElements = $$('li.command', this.resultsElement);
+
+        if (resultElements.length === 0) {
+            return;
+        }
+
+        this.selectedIndex += direction === 'ArrowDown' ? 1 : -1;
+
+        if (this.selectedIndex === -1) {
+            this.inputElement.focus();
+            return;
+        }
+
+        if (this.selectedIndex === -2) {
+            // to high go to bottom of commands
+            this.selectedIndex = resultElements.length - 1;
+        }
+
+        if (this.selectedIndex === resultElements.length) {
+            // to low, go to top of commands
+            this.selectedIndex = 0;
+        }
+
+        const commandElementToFocus = resultElements[this.selectedIndex];
+        commandElementToFocus.focus();
+    }
+
+    getSearchText() {
+        const searchText = this.inputElement.value.toLowerCase();
+        const searchTextShortcutMatch = searchText?.match(/^(\w+)\s/);
+        const searchTextShortcut =
+            searchTextShortcutMatch?.[1]?.length && searchTextShortcutMatch[1];
+        return { searchText, searchTextShortcut } as const;
+    }
+
+    async inputChange() {
+        this.selectedIndex = -1;
+
+        this.loadResults();
+    }
+
+    runCommand(command: Command) {
+        runCommand(command.fileName);
+
+        if (command.close) this.unloadConsole();
+    }
+
+    clickListener(e: MouseEvent) {
         const targetElement = e.target as HTMLElement;
 
-        const targetNodeName = targetElement.nodeName.toLowerCase();
+        if (
+            targetElement.nodeName.toLowerCase() === 'li' &&
+            targetElement.dataset.command
+        ) {
+            this.runCommand(
+                this.commands.find(
+                    ({ fileName }) => targetElement.dataset.command === fileName
+                )
+            );
+            return;
+        }
+
+        return;
+    }
+
+    keyupListener(e: KeyboardEvent) {
+        const targetElement = e.target as HTMLElement;
+
+        const targetNodeName = targetElement.nodeName.toLowerCase() as
+            | 'li'
+            | 'input';
 
         if (targetNodeName !== 'input' && targetNodeName !== 'li') return;
 
         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-            if (e.key === 'ArrowUp' && targetNodeName === 'input') return;
+            if (targetNodeName === 'input') {
+                if (e.key === 'ArrowUp') return;
+                if ((targetElement as HTMLInputElement).value === '')
+                    this.loadResults();
+            }
+
             this.selectCommand(e.key);
             return;
         }
@@ -197,15 +247,20 @@ new (class {
         if (e.key === 'Enter') {
             if (targetNodeName === 'li')
                 this.runCommand(
-                    this.commands[Number(targetElement.dataset.commandIndex)]
+                    this.commands.find(
+                        ({ fileName }) =>
+                            targetElement.dataset.command === fileName
+                    )
                 );
 
             if (targetNodeName === 'input') {
                 const { searchTextShortcut } = this.getSearchText();
 
-                const shortcutPrefixCommand = this.commands.find(
-                    (c) => c.shortcut === searchTextShortcut
-                );
+                const shortcutPrefixCommand =
+                    searchTextShortcut &&
+                    this.commands.find(
+                        (c) => c.shortcut === searchTextShortcut
+                    );
 
                 if (shortcutPrefixCommand) {
                     this.runCommand(shortcutPrefixCommand);
@@ -215,14 +270,11 @@ new (class {
         }
 
         if (e.key === 'Escape') {
-            this.unloadContainer();
+            this.unloadConsole();
             return;
         }
-    }
 
-    runCommand(command: Command) {
-        runCommand(command.fileName);
-
-        if (command.close) this.unloadContainer();
+        e.preventDefault();
+        e.stopPropagation();
     }
 })();

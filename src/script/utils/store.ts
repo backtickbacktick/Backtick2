@@ -1,10 +1,8 @@
-import { Command } from './types';
-
-const BACKTICK_COMMNDS = 'BACKTICK_COMMNDS';
+const BACKTICK_COMMANDS = 'BACKTICK_COMMANDS';
 
 export function setStore(commands: Command[]) {
     return new Promise((resolve) => {
-        chrome.storage.sync.set({ BACKTICK_COMMNDS: commands }, function () {
+        chrome.storage.sync.set({ BACKTICK_COMMANDS: commands }, function () {
             resolve(true);
         });
     });
@@ -12,8 +10,8 @@ export function setStore(commands: Command[]) {
 
 export function getStore(): Promise<Command[]> {
     return new Promise((resolve) => {
-        chrome.storage.sync.get([BACKTICK_COMMNDS], function (result) {
-            resolve(result?.[BACKTICK_COMMNDS] || []);
+        chrome.storage.sync.get([BACKTICK_COMMANDS], function (result) {
+            resolve(result?.[BACKTICK_COMMANDS] || []);
         });
     });
 }
