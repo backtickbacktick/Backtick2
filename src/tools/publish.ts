@@ -7,11 +7,16 @@ import * as fs from 'fs';
 
     const { version } = JSON.parse(packageContent);
 
-    fs.unlinkSync('backtick-' + version + '.tgz');
+    fs.unlinkSync('backtick-chrome-extension.tgz');
 
     const [major, minor, patch] = version.split('.').map(Number);
 
     const newVersion = [major, minor, patch + 1].join('.');
+
+    fs.writeFileSync(
+        'extension/README.md',
+        fs.readFileSync('README.md', 'utf-8')
+    );
 
     fs.writeFileSync(
         'package.json',
@@ -29,5 +34,5 @@ import * as fs from 'fs';
         )
     );
 
-    await tar('extension', 'backtick-' + newVersion + '.tgz');
+    await tar('extension', 'backtick-chrome-extension.tgz');
 })();
