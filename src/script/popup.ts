@@ -53,14 +53,14 @@ new (class {
     commands: Command[] = [];
 
     constructor() {
-        this.pageElement.innerHTML = `<div class="loading">Loading commands...</div>`;
+        this.pageElement.innerHTML = `<div class="_bt-loading">Loading commands...</div>`;
 
         getStore().then((commands) => {
             this.commands = commands;
 
             this.shouldReload().then((shouldReload) => {
                 if (!commands.length || shouldReload) {
-                    this.pageElement.innerHTML = `<div class="loading">Reloading commands...</div>`;
+                    this.pageElement.innerHTML = `<div class="_bt-loading">Reloading commands...</div>`;
 
                     this.reloadCommands();
                 } else {
@@ -99,7 +99,7 @@ new (class {
         const commandsList = this.commands
             .map(
                 (command: Command) =>
-                    `<li class="${command.error && 'error'}">${
+                    `<li class="${command.error && '_bt-error'}">${
                         command.error || command.name || command.fileName
                     }</li>`
             )
@@ -107,15 +107,15 @@ new (class {
 
         const shouldReload = await this.shouldReload();
 
-        this.pageElement.innerHTML = `<div class="commands"><h3>Commands Loaded</h3><ul>${commandsList}</ul></div>${
-            shouldReload ? `<div class="">` : ''
+        this.pageElement.innerHTML = `<div class="_bt-commands"><h3>Commands Loaded</h3><ul>${commandsList}</ul></div>${
+            shouldReload ? `<div></div>` : ''
         }`;
 
         this.buttonElement.style.display = 'block';
     }
 
     async reloadCommands() {
-        this.pageElement.innerHTML = `<div class="loading">Reloading commands...</div>`;
+        this.pageElement.innerHTML = `<div class="_bt-loading">Reloading commands...</div>`;
 
         this.buttonElement.style.display = 'none';
 

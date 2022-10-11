@@ -5,6 +5,6 @@
  */
 (() => {
     window.open(
-       `https://www.google.com/search?q=`+ (document.querySelector('#backtick-container input').value + '').substring(2)
+       `https://www.google.com/search?q=`+ (document.querySelector('#_bt-container input').value + '').substring(2)
     );
 })()

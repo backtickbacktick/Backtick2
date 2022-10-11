@@ -22,15 +22,15 @@ new (class {
 
     constructor() {
         this.rootElement = document.createElement('div');
-        this.rootElement.id = 'backtick-container';
+        this.rootElement.id = '_bt-container';
         this.rootElement.style.display = 'none';
-        this.rootElement.classList.add('out');
+        this.rootElement.classList.add('_bt-out');
         this.rootElement.innerHTML = `
-<div class="console">
+<div class="_bt-console">
     <input autocomplete="off" type="text" placeholder="Find and execute a command" spellcheck="false" name="backtick">
-    <div class="icon">${svg}</div>
+    <div class="_bt-icon">${svg}</div>
 </div>
-<div class="results">
+<div class="_bt-results">
     <ul></ul>
 </div>
 `;
@@ -64,7 +64,7 @@ new (class {
     }
 
     loadConsole() {
-        this.rootElement.classList.replace('out', 'in');
+        this.rootElement.classList.replace('_bt-out', '_bt-in');
         this.rootElement.style.display = 'block';
 
         setTimeout(() => {
@@ -84,7 +84,7 @@ new (class {
     }
 
     unloadConsole() {
-        this.rootElement.classList.replace('in', 'out');
+        this.rootElement.classList.replace('_bt-in', '_bt-out');
         this.resultsElement.innerHTML = '';
         this.inputElement.value = '';
 
@@ -146,20 +146,20 @@ new (class {
             this.resultsElement.innerHTML = this.results
                 .map(
                     ({ command }) => `
-<li class="command" tabindex="0" data-command="${command.fileName}">
-    <div class="active"></div><span class="name">${command.name}</span><p class="description">${command.description}</p>
+<li class="_bt-command" tabindex="0" data-command="${command.fileName}">
+    <div class="_bt-active"></div><span class="_bt-name">${command.name}</span><p class="_bt-description">${command.description}</p>
 </li>
             `
                 )
                 .join('');
         } else {
             this.resultsElement.innerHTML =
-                '<li class="none">No commands found</li>';
+                '<li class="_bt-none">No commands found</li>';
         }
     }
 
     selectCommand(direction: 'ArrowUp' | 'ArrowDown') {
-        const resultElements = $$('li.command', this.resultsElement);
+        const resultElements = $$('li._bt-command', this.resultsElement);
 
         if (resultElements.length === 0) {
             return;

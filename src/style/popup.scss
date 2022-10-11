@@ -2,13 +2,19 @@ $background-color: #333;
 $foreground-color: #e1e1e1;
 $orange-color: #d5851b;
 
+._bt-reset {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+}
+
 body {
-    .reset {
-        box-sizing: border-box;
-        padding: 0;
-        margin: 0;
-        background: transparent;
-        border: none;
+    @extend ._bt-reset;
+
+    * {
+        @extend ._bt-reset;
     }
 
     background-color: $background-color;
@@ -25,14 +31,14 @@ body {
     padding: 1.5rem;
     margin: 0;
 
-    .loading {
+    ._bt-loading {
         font-size: 16px;
         font-weight: bold;
         color: $orange-color;
     }
 
     button {
-        @extend .reset;
+        @extend ._bt-reset;
         margin-top: 1rem;
         color: $orange-color;
         font-weight: bold;
@@ -40,12 +46,8 @@ body {
         cursor: pointer;
     }
 
-    @extend .reset;
-
     ul {
-        @extend .reset;
         li {
-            @extend .reset;
             list-style: none;
             padding: 0.5rem 0;
             & + li {
